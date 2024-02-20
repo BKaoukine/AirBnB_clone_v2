@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 """ Console Module """
-from datetime import datetime
 import cmd
 import sys
 from models.base_model import BaseModel
@@ -74,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] == '{' and pline[-1] == '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -114,104 +113,29 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def create_object(self, args):
-        """ Create an object of any class based on given arguments """
+    def do_create(self, line):
+        """developed a new instance of BaseModel, saves it
+        Exceptions:
+            SyntaxError: when there is no args given
+            NameError: when there is no object taht has the name
+        """
 
-        # List of attribute names to ignore while creating object
-        ignored_attrs = ('id', 'created_at', 'updated_at', '__class__')
-
-        # Regular expression pattern to match valid class name
-        class_name_pattern = r'(?P<class_name>(?:[a-zA-Z]|_)(?:[a-zA-Z]|\d|_)*)'
-
-        # Attempt to match class name from the beginning of the args string
-        class_match = re.match(class_name_pattern, args)
-        
-        # Dictionary to store object attributes
-        obj_attributes = {}
-
-        if class_match is not None:
-            # Extract class name if found
-            class_name = class_match.group('class_name')
-            
-            # Extract parameters string after class name
-            params_str = args[len(class_name):].strip()
-            
-            # Split parameters string into individual parameters
-            params = params_str.split(' ')
-            
-            # Regular expression pattern to match different value types
-            str_pattern = r'(?P<str_val>"([^"]|\")*")'
-            float_pattern = r'(?P<float_val>[-+]?\d+\.\d+)'
-            int_pattern = r'(?P<int_val>[-+]?\d+)'
-            
-            # Pattern to match parameter key-value pairs
-            param_pattern = '{}=({}|{}|{})'.format(
-                class_name_pattern,
-                str_pattern,
-                float_pattern,
-                int_pattern
-            )
-            
-            # Iterate over each parameter
-            for param in params:
-                # Attempt to match parameter key-value pair
-                param_match = re.fullmatch(param_pattern, param)
-                
-                if param_match is not None:
-                    # Extract key name
-                    key_name = param_match.group('class_name')
-                    
-                    # Extract value types
-                    str_val = param_match.group('str_val')
-                    float_val = param_match.group('float_val')
-                    int_val = param_match.group('int_val')
-                    
-                    # Check value types and assign to obj_attributes
-                    if float_val is not None:
-                        obj_attributes[key_name] = float(float_val)
-                    if int_val is not None:
-                        obj_attributes[key_name] = int(int_val)
-                    if str_val is not None:
-                        obj_attributes[key_name] = str_val[1:-1].replace('_', ' ')
-        else:
-            class_name = args
-        
-        # Check if class name is missing
-        if not class_name:
+        try:
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")
+            obj= HBNBCommand.classes[my_list[0]]()
+            for element in my_list[1:]:
+                key, val = element.split('=')
+                val = val.replace('_', ' ')
+                if hasattr(obj, key):
+                    setattr(obj, key, eval(val))
+            obj.save()
+            print("{}".format(obj.id))
+        except SyntaxError:
             print("** class name missing **")
-            return
-        
-        # Check if class name exists in available classes
-        elif class_name not in HBNBCommand.classes:
+        except NameError:
             print("** class doesn't exist **")
-            return
-
-        # If storage type is set to 'db'
-        if os.getenv('HBNB_TYPE_STORAGE') == 'db':
-            # Set default values for id, created_at, and updated_at
-            if 'id' not in obj_attributes:
-                obj_attributes['id'] = str(uuid.uuid4())
-            if 'created_at' not in obj_attributes:
-                obj_attributes['created_at'] = str(datetime.now())
-            if 'updated_at' not in obj_attributes:
-                obj_attributes['updated_at'] = str(datetime.now())
-            
-            # Create an instance of the class and save it to the database
-            new_instance = HBNBCommand.classes[class_name](**obj_attributes)
-            new_instance.save()
-            print(new_instance.id)
-        else:
-            # Create an instance of the class
-            new_instance = HBNBCommand.classes[class_name]()
-            
-            # Set object attributes from obj_attributes
-            for key, value in obj_attributes.items():
-                if key not in ignored_attrs:
-                    setattr(new_instance, key, value)
-            
-            # Save the instance and print its id
-            new_instance.save()
-            print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -359,7 +283,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] is '\"':  # check for quoted arg
+            if args and args[0] == '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -367,10 +291,10 @@ class HBNBCommand(cmd.Cmd):
             args = args.partition(' ')
 
             # if att_name was not quoted arg
-            if not att_name and args[0] is not ' ':
+            if not att_name and args[0] != ' ':
                 att_name = args[0]
             # check for quoted val arg
-            if args[2] and args[2][0] is '\"':
+            if args[2] and args[2][0] == '\"':
                 att_val = args[2][1:args[2].find('\"', 1)]
 
             # if att_val was not quoted arg
