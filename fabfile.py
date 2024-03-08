@@ -4,7 +4,7 @@ Fabric script that distributes an archive to your web servers
 """
 
 from datetime import datetime
-from fabric.api import *
+from fabric.api import env, local
 import os
 
 env.hosts = ["	100.26.136.137", "	34.224.2.22"]
