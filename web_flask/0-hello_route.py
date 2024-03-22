@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""Simple Flask Server Script."""
 
 
 from flask import Flask
@@ -10,7 +11,7 @@ app.url_map.strict_slashes = False
 
 def greeting():
     """
-    Function to return a greeting message.
+    Greeting to return a greeting message.
 
     Returns:
         str: A greeting message.
