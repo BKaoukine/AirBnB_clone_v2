@@ -49,7 +49,8 @@ def String(text):
     Returns:
         str: A  message.
     """
-    return "C %s" % text
+    dynurl = text.replace("_", " ")
+    return "C %s" % dynurl
 
 
 if __name__ == '__main__':
