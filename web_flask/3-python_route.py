@@ -63,7 +63,7 @@ def dyUrl(text="is_cool"):
         str: A  message.
     """
     dynurl = text.replace("_", " ")
-    return "C %s" % dynurl
+    return "Python %s" % dynurl
 
 
 if __name__ == '__main__':
