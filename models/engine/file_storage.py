@@ -48,16 +48,16 @@ class FileStorage:
                 self.save()
 
     def all(self, cls=None):
-        """Returns a dictionary of all objects of cls"""
-        if cls is not None:
-            objects_dict = {}
-            for key, obj in self.__objects.items():
-                if isinstance(obj, cls):
-                    objects_dict[key] = obj
-            return objects_dict
+        """Returns a dictionary of models in storage"""
+        print_dict = {}
+        if cls:
+            className = cls.__name__
+            for k, v in FileStorage.__objects.items():
+                if k.split('.')[0] == className:
+                    print_dict[k] = v
+            return print_dict
         else:
-            return self.__objects
-
+            return FileStorage.__objects
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -91,3 +91,4 @@ class FileStorage:
     def close(self):
         """method for deserializing the JSON file to objects"""
         self.reload()
+
