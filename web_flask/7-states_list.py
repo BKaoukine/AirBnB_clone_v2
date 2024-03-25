@@ -8,7 +8,7 @@ from models.state import State
 app = Flask(__name__)
 
 
-@app.route('/states_list')
+@app.route('/states_list', strict_slashes=False)
 def states_list_page():
     """Route decorator for displaying a list of states."""
     states = storage.all(State)
